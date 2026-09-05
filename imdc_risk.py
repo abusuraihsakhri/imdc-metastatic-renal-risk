@@ -65,11 +65,28 @@ def process_single(args) -> None:
     print(json.dumps(res, indent=2))
 
 
+def _validate_csv_path(filepath: str) -> str:
+    """Validate CSV file path to prevent path traversal."""
+    import os.path
+    normalized = os.path.normpath(filepath)
+    if normalized.startswith("..") or normalized.startswith("/") or normalized.startswith("\\"):
+        raise ValueError(f"Invalid path: {filepath}. Path traversal not allowed.")
+    return normalized
+
+
 def process_batch(input_csv: str, output_csv: str) -> None:
-    with open(input_csv, mode="r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        fieldnames = list(reader.fieldnames or [])
-        rows = list(reader)
+    input_csv = _validate_csv_path(input_csv)
+    output_csv = _validate_csv_path(output_csv)
+
+    try:
+        with open(input_csv, mode="r", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            fieldnames = list(reader.fieldnames or [])
+            rows = list(reader)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Input file not found: {input_csv}")
+    except PermissionError:
+        raise PermissionError(f"Permission denied reading: {input_csv}")
 
     out_fields = fieldnames + ["score", "classification", "clinical_recommendation"]
     out_rows = []

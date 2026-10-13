@@ -1,4 +1,4 @@
-Patient_ID,v1,v2,v3
-PT-101,14.5,4.2,1.8
-PT-102,8.0,2.1,0.5
-PT-103,28.4,12.0,5.5
+case_id,kps_below_80,diagnosis_to_treatment_lt_1yr,hemoglobin_below_lln,corrected_calcium_above_uln,neutrophils_above_uln,platelets_above_uln
+CASE-001,no,no,no,no,no,no
+CASE-002,no,yes,yes,no,no,no
+CASE-003,yes,yes,yes,no,no,no

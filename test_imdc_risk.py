@@ -1,21 +1,21 @@
-import pytest
-from imdc_risk import calculate_metrics, process_batch
+"""Compatibility regression tests for the IMDC CLI functions."""
+import csv
+from imdc_risk import FIELDS, calculate_metrics, process_batch
 
 
 def test_imdc_risk_single():
-    res = calculate_metrics(v1=12.0, v2=4.0)
-    assert "score" in res
-    assert "classification" in res
-    assert res["score"] > 0
+    flags = {key: "no" for key in FIELDS}
+    flags[FIELDS[0]] = "yes"
+    result = calculate_metrics(**flags)
+    assert result["score"] == 1
+    assert result["classification"] == "Intermediate"
 
 
 def test_imdc_risk_batch(tmp_path):
-    csv_in = tmp_path / "in.csv"
-    csv_out = tmp_path / "out.csv"
-    csv_in.write_text("Patient,v1,v2\nPat_001,15.0,3.0\nPat_002,5.0,1.0\n", encoding="utf-8")
-    
-    process_batch(str(csv_in), str(csv_out))
-    assert csv_out.exists()
-    content = csv_out.read_text(encoding="utf-8")
-    assert "Pat_001" in content
-    assert "score" in content
+    source, output = tmp_path / "in.csv", tmp_path / "out.csv"
+    with source.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["case_id", *FIELDS])
+        writer.writeheader()
+        writer.writerow({"case_id": "CASE-A", **{key: "no" for key in FIELDS}})
+    assert process_batch(str(source), str(output)) == 1
+    assert "Favorable" in output.read_text(encoding="utf-8")

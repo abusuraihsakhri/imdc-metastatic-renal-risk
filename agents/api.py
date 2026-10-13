@@ -12,7 +12,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Imdc Metastatic Renal Risk API",
-    description="Enterprise Distributed Component Platform (Clinical & Biomedical AI)",
+    description="Six-factor IMDC scoring endpoint plus separate generic audit demonstrations",
     version="3.0.0-ENTERPRISE",
 )
 

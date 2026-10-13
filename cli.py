@@ -8,6 +8,7 @@ import sys
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger
+from imdc_risk import FIELDS, process_batch, _parse_bool
 
 supervisor = SystemSupervisor(model_provider="mock")
 
@@ -92,6 +93,13 @@ def main(argv=None):
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
 
+        if all(field in fieldnames for field in FIELDS):
+            print(f"Processed {process_batch(input_path, output_path)} IMDC records -> {output_path}")
+            return 0
+        if not {"task_id", "target_identifier", "primary_metric"}.issubset(fieldnames):
+            print("Error: CSV must have six IMDC factor columns or explicit audit fields.", file=sys.stderr)
+            return 2
+
         out_fields = fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]
         out_rows = []
         for r in rows:
@@ -101,7 +109,7 @@ def main(argv=None):
                 primary_metric=float(r.get("primary_metric", 15.0)),
                 secondary_metric=float(r.get("secondary_metric", 5.0)),
                 status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                is_critical_flag=_parse_bool(r.get("is_critical_flag", "false"), "is_critical_flag"),
             )
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)

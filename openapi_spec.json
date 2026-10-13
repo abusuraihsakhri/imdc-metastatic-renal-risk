@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Imdc Metastatic Renal Risk API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
+    "description": "Six-factor IMDC/Heng prognostic scoring and separate generic demonstration audit endpoints.",
     "version": "3.0.0-ENTERPRISE",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
@@ -107,6 +107,58 @@
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          }
+        }
+      }
+    },
+    "/api/imdc": {
+      "post": {
+        "summary": "Compute validated six-factor IMDC prognostic group",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kps_below_80": {
+                    "type": "boolean"
+                  },
+                  "diagnosis_to_treatment_lt_1yr": {
+                    "type": "boolean"
+                  },
+                  "hemoglobin_below_lln": {
+                    "type": "boolean"
+                  },
+                  "corrected_calcium_above_uln": {
+                    "type": "boolean"
+                  },
+                  "neutrophils_above_uln": {
+                    "type": "boolean"
+                  },
+                  "platelets_above_uln": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "kps_below_80",
+                  "diagnosis_to_treatment_lt_1yr",
+                  "hemoglobin_below_lln",
+                  "corrected_calcium_above_uln",
+                  "neutrophils_above_uln",
+                  "platelets_above_uln"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Score (0 to 6) and group (Favorable, Intermediate, Poor)"
+          },
+          "422": {
+            "description": "Invalid or missing factors"
           }
         }
       }

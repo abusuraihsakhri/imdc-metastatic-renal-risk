@@ -59,6 +59,8 @@ class AuditTrail:
     def __init__(self, secret_key: Optional[str] = None):
         resolved_key = secret_key or os.getenv("AUDIT_SECRET_KEY")
         if not resolved_key:
+            if os.getenv("APP_ENV", "").lower() in ("production", "prod"):
+                raise RuntimeError("AUDIT_SECRET_KEY is required in production")
             import warnings
             warnings.warn(
                 "AUDIT_SECRET_KEY not set. Using development-only fallback. "
